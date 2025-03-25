@@ -26,10 +26,10 @@ export const SinglePokemon = () => {
     }, []);
 
     return (
-        <div className='grid grid-cols-5 pb-10 gap-4'>
-            {loading ? <h1>Loading...</h1> : (
-                <div className='p-4' key={pokemon.id}>
-                    <img className='pokeImage' src={pokemon.sprites.front_default} alt='pokemon' />
+        <div>
+            {loading ? <p>Loading...</p> : (
+                <div className='p-4'>
+                    <img className='' src={pokemon.sprites.front_default} alt='pokemon' />
                     <p>{pokemon.name}</p>
                     <p># {pokemon.id}</p>
                 </div>
