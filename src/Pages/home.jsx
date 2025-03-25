@@ -4,10 +4,14 @@ import { getPokemon, getAllPokemon } from '../Services/pokeService';
 
 export const Home = () => {
   const [pokemonData, setPokemonData] = useState([]);
+  const [filteredPokemonData, setFilteredPokemonData] = useState([]);
   const [loading, isLoading] = useState(true);
+
   const apiURL = 'https://pokeapi.co/api/v2/pokemon?limit=151';
+
   const navigate = useNavigate();
 
+  // Initial loading of pokemon
   useEffect(() => {
     async function fetchData() {
       let response = await getAllPokemon(apiURL);
@@ -27,20 +31,17 @@ export const Home = () => {
 
   }
 
+  // Opens singular pokemon page
   const openSinglePokemon = (id) => {
     navigate(`/pokemon/${id}`);
   }
 
-  const [filteredPokemonData, setFilteredPokemonData] = useState([]);
-
+  // Search functionality
   function handleSearchInput(input) {
     let filteredPokemon = pokemonData.filter(pokemon => pokemon.name.toLowerCase().includes(input.toLowerCase()));
     setFilteredPokemonData(filteredPokemon);
     console.log(pokemonData)
   }
-
-
-
 
   return (
     <div>
@@ -50,20 +51,20 @@ export const Home = () => {
         onChange={(e) => handleSearchInput(e.target.value)}
         className=' rounded-full border-2 m-2 p-2 bg-white shadow-red-300'
         >
-        </input>
+      </input>
 
       {loading ? <p>Loading...</p> : (
-      <div className='grid grid-cols-10 pb-10 gap-4'>
-        {filteredPokemonData.map((p) => (
+        <div className='grid grid-cols-10 pb-10 gap-4'>
+          {filteredPokemonData.map((p) => (
             <div className='bg-blue-100 hover:cursor-pointer' key={p.id} onClick={() => openSinglePokemon(p.id)}>
-                <img className='justcenter' src={p.sprites.front_default} alt={p.name} />
-                <p>{p.name}</p>
-                <p># {p.id}</p>
+              <img className='justcenter' src={p.sprites.front_default} alt={p.name} />
+              <p>{p.name}</p>
+              <p># {p.id}</p>
             </div>
-        ))}
+          ))}
+        </div>
+      )}
     </div>
-  )}
-  </div>
   );
 }
 

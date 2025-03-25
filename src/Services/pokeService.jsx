@@ -12,7 +12,6 @@ export async function getAllPokemon(url) {
     fetch(url).then(res => res.json())
         .then(data => {
         resolve(data)
-        console.log(data);
         })  
     })
 }
