@@ -7,9 +7,12 @@ export const SinglePokemon = () => {
     const joinURL = `https://pokeapi.co/api/v2/pokemon/${id}`;
 
     const [pokemon, setPokemon] = useState([]);
-    const [evolves, setEvolves] = useState(true);
+    const [evolution, setEvolution] = useState([]);
+    const [addedChildChild, setAddedChildChild] = useState(false);
+    const [addedChild, setAddedChild] = useState(false);
     let evolutionList = [];
     let evolutionListChild = [];
+    let evolutionListChildChild = [];
 
 
     const [loading, isLoading] = useState(true);
@@ -30,7 +33,6 @@ export const SinglePokemon = () => {
                 // evolution chain data
                 const eResponse = await fetch(sData.evolution_chain.url);
                 const eData = await eResponse.json();
-                evolutionList.push(eData.chain.species.url);
                 collectEvolution(eData.chain);
             } catch (e) {
                 setError(e.message);
@@ -38,39 +40,46 @@ export const SinglePokemon = () => {
             }
         }
 
-        const collectEvolution = async (evolutionChain) => {
+        const collectEvolution = (evolutionChain) => {
             let evolutionData = evolutionChain;
 
+            evolutionList.push(evolutionData.species.url);
             for (let i = 0; i < evolutionData.evolves_to.length; i++) {
-                let evolutionDataChild = evolutionData.evolves_to[0];
-                evolutionList.push(evolutionData.species.url);
+                let evolutionDataChild = evolutionData.evolves_to[i];
+                evolutionListChild.push(evolutionDataChild.species.url);
                 for (let i = 0; i < evolutionDataChild.evolves_to.length; i++) {
-                    let evolutionDataChildChild = evolutionDataChild.evolves_to[0];
-                    evolutionListChild.push(evolutionDataChild.species.url);
+                    let evolutionDataChildChild = evolutionDataChild.evolves_to[i];
+                    evolutionListChildChild.push(evolutionDataChildChild.species.url);
                 }
             }
-            if (evolutionData.evolves_to.length > 0) {
-                
-            } else {
-                setEvolves(false);
-            }
-            let uniqueEvolutionList = new Set (evolutionList);
-            evolutionList = [...uniqueEvolutionList];
+            // let uniqueEvolutionList = new Set (evolutionList);
+            // evolutionList = [...uniqueEvolutionList];
+    
+            // let uniqueEvolutionListChild = new Set (evolutionListChild);
+            // evolutionListChild = [...uniqueEvolutionListChild];
+    
+            // let uniqueEvolutionListChildChild = new Set (evolutionListChildChild);
+            // evolutionListChildChild = [...uniqueEvolutionListChildChild];
+            
 
-            let uniqueEvolutionListChild = new Set (evolutionListChild);
-            evolutionListChild = [...uniqueEvolutionListChild];
 
-            evolutionList.push(evolutionListChild);
-            console.log(evolutionList)
+            evolutionList.push(evolutionListChild);    
+            evolutionList.push(evolutionListChildChild);    
+
+
+            // console.log(evolutionList)
 
             isLoading(false);
-
-            if(!evolves) {
-            }
         }
+
+
         fetchData();
 
+
+
     }, []);
+
+
 
     return (
         <div>

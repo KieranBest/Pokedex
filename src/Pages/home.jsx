@@ -40,7 +40,6 @@ export const Home = () => {
   function handleSearchInput(input) {
     let filteredPokemon = pokemonData.filter(pokemon => pokemon.name.toLowerCase().includes(input.toLowerCase()));
     setFilteredPokemonData(filteredPokemon);
-    console.log(filteredPokemon)
   }
 
   const colourTypes = {
