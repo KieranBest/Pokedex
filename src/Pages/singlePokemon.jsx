@@ -8,15 +8,20 @@ export const SinglePokemon = () => {
 
     const [pokemon, setPokemon] = useState([]);
     const [evolution, setEvolution] = useState([]);
-    const [addedChildChild, setAddedChildChild] = useState(false);
-    const [addedChild, setAddedChild] = useState(false);
+    const [addedChild, setAddedChild] = useState([]);
+    const [addedChildChild, setAddedChildChild] = useState([]);
+    const [combined, setCombined] = useState(false);
+
     let evolutionList = [];
     let evolutionListChild = [];
     let evolutionListChildChild = [];
 
-
     const [loading, isLoading] = useState(true);
     const [error, setError] = useState(undefined);
+
+    function onlyUnique(value, index, array) {
+        return array.indexOf(value) === index;
+    }
 
     useEffect(() => {
         async function fetchData() {
@@ -41,45 +46,48 @@ export const SinglePokemon = () => {
         }
 
         const collectEvolution = (evolutionChain) => {
-            let evolutionData = evolutionChain;
+            let centrePokemon = evolutionChain.species.url;
 
-            evolutionList.push(evolutionData.species.url);
-            for (let i = 0; i < evolutionData.evolves_to.length; i++) {
-                let evolutionDataChild = evolutionData.evolves_to[i];
-                evolutionListChild.push(evolutionDataChild.species.url);
-                for (let i = 0; i < evolutionDataChild.evolves_to.length; i++) {
-                    let evolutionDataChildChild = evolutionDataChild.evolves_to[i];
-                    evolutionListChildChild.push(evolutionDataChildChild.species.url);
+            if (evolutionChain.evolves_to.length > 0) {
+                for (let i = 0; i < evolutionChain.evolves_to.length; i++) {
+                    let evolutionChainChild = evolutionChain.evolves_to[i];
+                    evolutionListChild.push(evolutionChainChild.species.url);
+                    if (evolutionChainChild.evolves_to.length > 0) {
+                        for (let i = 0; i < evolutionChainChild.evolves_to.length; i++) {
+                            let evolutionChainChildChild = evolutionChainChild.evolves_to[i];
+                            evolutionListChildChild.push(evolutionChainChildChild.species.url);
+                        }
+                    } else {
+                        console.log("No Evolutions 2");
+                    }
+                }
+            } else {
+                console.log("No Evolutions");
+            }
+
+
+            const uniqueEvolutionListChild = evolutionListChild.filter(onlyUnique);
+            const uniqueEvolutionListChildChild = evolutionListChildChild.filter(onlyUnique);
+
+            if(!combined) {
+                setCombined(true); 
+                setEvolution(centrePokemon);
+                if(uniqueEvolutionListChild.length > 0) {
+                    setAddedChild(uniqueEvolutionListChild);
+                }
+                if(uniqueEvolutionListChildChild.length > 0) {
+                    setAddedChildChild(uniqueEvolutionListChildChild);
                 }
             }
-            // let uniqueEvolutionList = new Set (evolutionList);
-            // evolutionList = [...uniqueEvolutionList];
-    
-            // let uniqueEvolutionListChild = new Set (evolutionListChild);
-            // evolutionListChild = [...uniqueEvolutionListChild];
-    
-            // let uniqueEvolutionListChildChild = new Set (evolutionListChildChild);
-            // evolutionListChildChild = [...uniqueEvolutionListChildChild];
-            
-
-
-            evolutionList.push(evolutionListChild);    
-            evolutionList.push(evolutionListChildChild);    
-
-
-            // console.log(evolutionList)
 
             isLoading(false);
+
         }
-
-
         fetchData();
 
 
 
     }, []);
-
-
 
     return (
         <div>
