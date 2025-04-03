@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react'
 import { useParams } from 'react-router-dom'
-import { getSinglePokemon} from '../Services/pokeService'
+import { colourTypes, getPokemon } from '../Services/pokeService'
 
 export const SinglePokemon = () => {
     const { id } = useParams();
@@ -24,11 +24,17 @@ export const SinglePokemon = () => {
     }
 
     useEffect(() => {
+        async function fetchPrimaryData(url) {
+            const response = await fetch(url);
+            const data = await response.json();
+            return data;
+        }
+
         async function fetchData() {
             try {
                 // id Pokemon data
-                const response = await fetch(joinURL);
-                const data = await response.json();
+                const data = await fetchPrimaryData(joinURL);
+                console.log(data)
                 setPokemon(data);
 
                 // species data
@@ -45,9 +51,13 @@ export const SinglePokemon = () => {
             }
         }
 
-        const collectEvolution = (evolutionChain) => {
-            let centrePokemon = evolutionChain.species.url;
+        async function collectEvolution(evolutionChain) {
 
+// needs to use await for fetchPrimaryData
+
+
+            const centrePokemon = await fetchPrimaryData(evolutionChain.species.url);
+            setEvolution(centrePokemon);
             if (evolutionChain.evolves_to.length > 0) {
                 for (let i = 0; i < evolutionChain.evolves_to.length; i++) {
                     let evolutionChainChild = evolutionChain.evolves_to[i];
@@ -65,35 +75,33 @@ export const SinglePokemon = () => {
                 console.log("No Evolutions");
             }
 
-
             const uniqueEvolutionListChild = evolutionListChild.filter(onlyUnique);
             const uniqueEvolutionListChildChild = evolutionListChildChild.filter(onlyUnique);
 
             if(!combined) {
                 setCombined(true); 
-                setEvolution(centrePokemon);
-                if(uniqueEvolutionListChild.length > 0) {
-                    setAddedChild(uniqueEvolutionListChild);
-                }
-                if(uniqueEvolutionListChildChild.length > 0) {
-                    setAddedChildChild(uniqueEvolutionListChildChild);
-                }
+                setAddedChild(uniqueEvolutionListChild);
+                setAddedChildChild(uniqueEvolutionListChildChild);
             }
 
             isLoading(false);
-
         }
+
         fetchData();
 
-
-
     }, []);
+
+    console.log(evolution)
+    console.log(addedChild)
+    console.log(addedChildChild)
 
     return (
         <div>
             {loading ? <p>Loading...</p> : (
                 <div>
-                    <div className='p-4'>
+                    <div className='p-4'
+                        style={{backgroundColor: `${colourTypes[pokemon.types[0].type.name]}`}}
+                    >
                         <img className='' src={pokemon.sprites.front_default} alt='pokemon' />
                         <p>{pokemon.name}</p>
                         <p># {pokemon.id}</p>
@@ -101,8 +109,8 @@ export const SinglePokemon = () => {
 
 
                     {/* <div className='grid grid-cols-10 pb-10 gap-4'>
-                        {evolutionPath.map((p) => (
-                            <div className='bg-blue-100 hover:cursor-pointer'
+                        {evolution.map((p) => (
+                            <div className='hover:cursor-pointer'
                                 style={{backgroundColor: `${colourTypes[p.types[0].type.name]}`}}
                                 key={p.id} onClick={() => openSinglePokemon(p.id)}
                             >
