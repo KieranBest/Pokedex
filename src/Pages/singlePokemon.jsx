@@ -4,27 +4,34 @@ import { colourTypes, getPokemon } from '../Services/pokeService'
 
 export const SinglePokemon = () => {
     const { id } = useParams();
-    const joinURL = `https://pokeapi.co/api/v2/pokemon/${id}`;
+    const idURL = `https://pokeapi.co/api/v2/pokemon/${id}`;
 
     const [pokemon, setPokemon] = useState([]);
     const [evolution, setEvolution] = useState([]);
-    const [addedChild, setAddedChild] = useState([]);
-    const [addedChildChild, setAddedChildChild] = useState([]);
-    const [combined, setCombined] = useState(false);
+    const [addedChild, setEvolutionChild] = useState([]);
+    const [addedChildChild, setEvolutionChildChild] = useState([]);
+    const [added, setAdded] = useState(false);
 
-    let evolutionList = [];
     let evolutionListChild = [];
     let evolutionListChildChild = [];
 
     const [loading, isLoading] = useState(true);
     const [error, setError] = useState(undefined);
 
-    function onlyUnique(value, index, array) {
-        return array.indexOf(value) === index;
+    function onlyUnique(repeatedArray) {
+        const names = [];
+        const uniqueArray = [];
+        repeatedArray.forEach((item) => {
+            if (!names.includes(item.name)) {
+                names.push(item.name);
+                uniqueArray.push(item);
+            }
+        });
+        return uniqueArray;
     }
 
     useEffect(() => {
-        async function fetchPrimaryData(url) {
+        async function fetchPData(url) {
             const response = await fetch(url);
             const data = await response.json();
             return data;
@@ -33,12 +40,16 @@ export const SinglePokemon = () => {
         async function fetchData() {
             try {
                 // id Pokemon data
-                const data = await fetchPrimaryData(joinURL);
+                const data = await fetchPData(idURL);
                 console.log(data)
                 setPokemon(data);
 
                 // species data
-                const sResponse = await fetch(data.species.url);
+                const sResponse = await  async function fetchPData(url) {
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    return data;
+                }(data.species.url);
                 const sData = await sResponse.json();
 
                 // evolution chain data
@@ -52,44 +63,43 @@ export const SinglePokemon = () => {
         }
 
         async function collectEvolution(evolutionChain) {
-
-// needs to use await for fetchPrimaryData
-
-
-            const centrePokemon = await fetchPrimaryData(evolutionChain.species.url);
+            const centrePokemonData = await fetchPData(evolutionChain.species.url);
+            const centrePokemon = await fetchPData(`https://pokeapi.co/api/v2/pokemon/${centrePokemonData.id}/`)
+            console.log(centrePokemon)
             setEvolution(centrePokemon);
+
             if (evolutionChain.evolves_to.length > 0) {
                 for (let i = 0; i < evolutionChain.evolves_to.length; i++) {
-                    let evolutionChainChild = evolutionChain.evolves_to[i];
-                    evolutionListChild.push(evolutionChainChild.species.url);
-                    if (evolutionChainChild.evolves_to.length > 0) {
-                        for (let i = 0; i < evolutionChainChild.evolves_to.length; i++) {
-                            let evolutionChainChildChild = evolutionChainChild.evolves_to[i];
-                            evolutionListChildChild.push(evolutionChainChildChild.species.url);
+                    let evoChainData = await fetchPData(evolutionChain.evolves_to[i].species.url)
+                    let evoChain = await fetchPData(`https://pokeapi.co/api/v2/pokemon/${evoChainData.id}/`)
+                    if(evolutionListChild.includes(evoChain) == false) evolutionListChild.push(evoChain);
+
+                    if (evolutionChain.evolves_to[i].evolves_to.length > 0) {
+                        for (let j = 0; j < evolutionChain.evolves_to[i].evolves_to.length; j++) {
+                            let evoChainChildData = await fetchPData(evolutionChain.evolves_to[i].evolves_to[j].species.url);
+                            let evoChainChild = await fetchPData(`https://pokeapi.co/api/v2/pokemon/${evoChainChildData.id}/`)
+                            evolutionListChildChild.push(evoChainChild);
                         }
-                    } else {
-                        console.log("No Evolutions 2");
                     }
                 }
-            } else {
-                console.log("No Evolutions");
             }
 
-            const uniqueEvolutionListChild = evolutionListChild.filter(onlyUnique);
-            const uniqueEvolutionListChildChild = evolutionListChildChild.filter(onlyUnique);
+            let uniqueEvolutionListChild = onlyUnique(evolutionListChild);
+            setEvolutionChild(uniqueEvolutionListChild);
 
-            if(!combined) {
-                setCombined(true); 
-                setAddedChild(uniqueEvolutionListChild);
-                setAddedChildChild(uniqueEvolutionListChildChild);
-            }
-
+            let uniqueEvolutionListChildChild = onlyUnique(evolutionListChildChild);
+            setEvolutionChildChild(uniqueEvolutionListChildChild);
+            
             isLoading(false);
         }
 
         fetchData();
 
     }, []);
+
+    
+    // let  = addedChildChild.filter(onlyUnique);
+    // setEvolutionChildChild(uniqueEvolutionListChildChild);
 
     console.log(evolution)
     console.log(addedChild)
@@ -102,24 +112,50 @@ export const SinglePokemon = () => {
                     <div className='p-4'
                         style={{backgroundColor: `${colourTypes[pokemon.types[0].type.name]}`}}
                     >
-                        <img className='' src={pokemon.sprites.front_default} alt='pokemon' />
+                        <img className='bg-white m-2 rounded-full' src={pokemon.sprites.front_default} alt='pokemon' />
                         <p>{pokemon.name}</p>
                         <p># {pokemon.id}</p>
                     </div>
 
 
-                    {/* <div className='grid grid-cols-10 pb-10 gap-4'>
-                        {evolution.map((p) => (
+                    <div className='grid grid-cols-3 p-10 gap-4'>
+                        <div className='grid grid-cols-1 p-10 gap-4'>
                             <div className='hover:cursor-pointer'
-                                style={{backgroundColor: `${colourTypes[p.types[0].type.name]}`}}
-                                key={p.id} onClick={() => openSinglePokemon(p.id)}
+                                style={{backgroundColor: `${colourTypes[evolution.types[0].type.name]}`}}
+                                onClick={() => openSinglePokemon(evolution.id)}
                             >
-                            <img className='bg-white m-2 rounded-full' src={p.sprites.front_default} alt={p.name} />
-                            <p>{p.name}</p>
-                            <p># {p.id} {p.types[0].type.name}</p>
+                                <img className='bg-white m-2 rounded-full' src={evolution.sprites.front_default} alt={evolution.name} />
+                                <p>{evolution.name}</p>
+                                <p># {evolution.id} {evolution.types[0].type.name}</p>
                             </div>
-                        ))}
-                    </div> */}
+                        </div>
+
+                        <div className='grid grid-cols-1 p-10 gap-4'>
+                            {addedChild.map((p) => (
+                                <div className='hover:cursor-pointer'
+                                    style={{backgroundColor: `${colourTypes[p.types[0].type.name]}`}}
+                                    key={p.id} onClick={() => openSinglePokemon(p.id)}
+                                >
+                                <img className='bg-white m-2 rounded-full' src={p.sprites.front_default} alt={p.name} />
+                                <p>{p.name}</p>
+                                <p># {p.id} {p.types[0].type.name}</p>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className='grid grid-cols-1 p-10 gap-4'>
+                            {addedChildChild.map((p) => (
+                                <div className='hover:cursor-pointer'
+                                    style={{backgroundColor: `${colourTypes[p.types[0].type.name]}`}}
+                                    key={p.id} onClick={() => openSinglePokemon(p.id)}
+                                >
+                                <img className='bg-white m-2 rounded-full' src={p.sprites.front_default} alt={p.name} />
+                                <p>{p.name}</p>
+                                <p># {p.id} {p.types[0].type.name}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

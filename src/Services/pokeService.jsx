@@ -36,3 +36,10 @@ export const colourTypes = {
     steel: '#B7B7CE',
     fairy: '#D685AD',
 };
+
+export const generations = {
+    1: "One",
+    2: "Two",
+    3: "Three",
+    4: "Four"
+};

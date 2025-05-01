@@ -4,13 +4,15 @@ import { getPokemon, getAllPokemon } from '../src/Services/pokeService'
 import "./App.css";
 
 import { Home } from './Pages/home'
+import { Generation } from './Pages/generation'
 import { SinglePokemon } from './Pages/singlePokemon'
 
 function App() {
   return (
     <Router>
         <Routes>
-          <Route path="/pokemon" element={<Home />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/generation" element={<Generation />} />
           <Route path="/pokemon/:id" element={<SinglePokemon />} />
         </Routes>
     </Router>
