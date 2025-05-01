@@ -73,8 +73,6 @@ export const Generation = () => {
         navigate("/generation", { state: id.key})
     }
 
-
-
     return (
         <div>
         <p className=' text-6xl'>Pokemon</p>

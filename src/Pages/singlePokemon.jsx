@@ -97,14 +97,6 @@ export const SinglePokemon = () => {
 
     }, []);
 
-    
-    // let  = addedChildChild.filter(onlyUnique);
-    // setEvolutionChildChild(uniqueEvolutionListChildChild);
-
-    console.log(evolution)
-    console.log(addedChild)
-    console.log(addedChildChild)
-
     return (
         <div>
             {loading ? <p>Loading...</p> : (
@@ -116,7 +108,6 @@ export const SinglePokemon = () => {
                         <p>{pokemon.name}</p>
                         <p># {pokemon.id}</p>
                     </div>
-
 
                     <div className='grid grid-cols-3 p-10 gap-4'>
                         <div className='grid grid-cols-1 p-10 gap-4'>
