@@ -65,8 +65,9 @@ export const SinglePokemon = () => {
         async function collectEvolution(evolutionChain) {
             const centrePokemonData = await fetchPData(evolutionChain.species.url);
             const centrePokemon = await fetchPData(`https://pokeapi.co/api/v2/pokemon/${centrePokemonData.id}/`)
-            console.log(centrePokemon)
             setEvolution(centrePokemon);
+            console.log(centrePokemonData)
+
 
             if (evolutionChain.evolves_to.length > 0) {
                 for (let i = 0; i < evolutionChain.evolves_to.length; i++) {
@@ -85,9 +86,11 @@ export const SinglePokemon = () => {
             }
 
             let uniqueEvolutionListChild = onlyUnique(evolutionListChild);
+            console.log(uniqueEvolutionListChild);
             setEvolutionChild(uniqueEvolutionListChild);
 
             let uniqueEvolutionListChildChild = onlyUnique(evolutionListChildChild);
+            console.log(uniqueEvolutionListChildChild);
             setEvolutionChildChild(uniqueEvolutionListChildChild);
             
             isLoading(false);
@@ -102,11 +105,11 @@ export const SinglePokemon = () => {
             {loading ? <p>Loading...</p> : (
                 <div>
                     <div className='p-4'
-                        style={{backgroundColor: `${colourTypes[pokemon.types[0].type.name]}`}}
+                        style={{backgroundColor: `${colourTypes[evolution.types[0].type.name]}`}}
                     >
-                        <img className='bg-white m-2 rounded-full' src={pokemon.sprites.front_default} alt='pokemon' />
-                        <p>{pokemon.name}</p>
-                        <p># {pokemon.id}</p>
+                        <img className='bg-white m-2 rounded-full' src={evolution.sprites.front_default} alt='pokemon' />
+                        <p>{evolution.name}</p>
+                        <p># {evolution.id}</p>
                     </div>
 
                     <div className='grid grid-cols-3 p-10 gap-4'>

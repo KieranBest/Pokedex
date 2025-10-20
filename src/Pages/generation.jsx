@@ -13,6 +13,8 @@ export const Generation = () => {
     const generationURL = `https://pokeapi.co/api/v2/generation/${generation}/`;
     let generationPokemon = [];
     let idArray = [];
+    let sortedGenerationPokemon = [];
+
 
     const navigate = useNavigate();
 
@@ -28,30 +30,33 @@ export const Generation = () => {
             let pData = await fetchPData(pokemon.url);
             if(idArray.includes(pData.id) == false) {
                 idArray.push(pData.id);
+                generationPokemon.push(await fetchPData(`https://pokeapi.co/api/v2/pokemon/${pData.id}`));
             }
         }
 
-        async function fetchPokemonData(id) {
-            console.log(id)
-            let genPokemon = await fetchPData(`https://pokeapi.co/api/v2/pokemon/${id}/`);
-            generationPokemon.push(genPokemon);
+        async function fetchPokemonData(generationData, loading) {
+            await generationData.forEach((pokemon) => fetchPokemonID(pokemon));
+            sortedGenerationPokemon = generationPokemon.sort((a, b) => {
+                if (a.id < b.id) {
+                    return -1;
+                }
+            });
+            console.log(generationPokemon.length)
+
+            if (loading) {
+                isLoading(false);
+            }
+
+            return sortedGenerationPokemon
         }
 
         async function fetchData() {
             const gData = await fetchPData(generationURL);
             const generationData = gData.pokemon_species;
 
-            // Gather pokemon ID's in the given generation
-            await generationData.forEach((pokemon) => fetchPokemonID(pokemon));
-            console.log(idArray)
-
-
-            console.log(idArray.length)
-
-
-            // setPokemonData(generationPokemon);
-            // setFilteredPokemonData(generationPokemon);
-            isLoading(false);
+            // Gather pokemon ID's in the given generation           
+            setPokemonData(await fetchPokemonData(generationData), false)
+            setFilteredPokemonData(await fetchPokemonData(generationData), true)
         }
         fetchData();
     }, [])
